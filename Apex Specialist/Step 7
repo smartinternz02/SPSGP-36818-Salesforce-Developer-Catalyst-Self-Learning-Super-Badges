@@ -1,0 +1,47 @@
+@IsTest
+private class WarehouseCalloutServiceTest {
+	@isTest
+    static void testWarehouseCallout() {
+        test.startTest();
+        test.setMock(HttpCalloutMock.class, new WarehouseCalloutServiceMock());
+        WarehouseCalloutService.execute(null);
+        test.stopTest();
+        
+        List<Product2> product2List = new List<Product2>();
+        product2List = [SELECT ProductCode FROM Product2];
+        
+        System.assertEquals(3, product2List.size());
+        System.assertEquals('55d66226726b611100aaf741', product2List.get(0).ProductCode);
+        System.assertEquals('55d66226726b611100aaf742', product2List.get(1).ProductCode);
+        System.assertEquals('55d66226726b611100aaf743', product2List.get(2).ProductCode);
+    }
+}
+
+
+
+
+
+global with sharing class WarehouseSyncSchedule implements Schedulable {
+    global void execute (SchedulableContext ctx){
+        System.enqueueJob(new WarehouseCalloutService());
+    }
+}
+
+
+
+
+
+
+@isTest
+public with sharing class WarehouseSyncScheduleTest {
+    @isTest static void test() {
+        String scheduleTime = '00 00 00 * * ? *';
+        Test.startTest();
+        Test.setMock(HttpCalloutMock.class, new WarehouseCalloutServiceMock());
+        String jobId = System.schedule('Warehouse Time to Schedule to test', scheduleTime, new WarehouseSyncSchedule());
+        CronTrigger c = [SELECT State FROM CronTrigger WHERE Id =: jobId];
+        System.assertEquals('WAITING', String.valueOf(c.State), 'JobId does not match');
+        
+        Test.stopTest();
+    }
+}
