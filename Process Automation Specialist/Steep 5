@@ -1,0 +1,1 @@
+if((Amount > 1000 && Approved__c = false && ispickVal(stageName  , "Closed Won")),true , false )
