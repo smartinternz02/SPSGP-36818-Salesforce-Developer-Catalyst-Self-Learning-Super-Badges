@@ -1,0 +1,10 @@
+static Id createTestRecord() {
+        Account TestAcc = new Account(
+          Name='Test record');
+        insert TestAcc;
+        Contact TestCon= new Contact(
+        LastName='Test', 
+        AccountId = TestAcc.id);
+        return TestAcc.Id;
+    } 
+}    
